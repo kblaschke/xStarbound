@@ -178,7 +178,7 @@ void Star::PcP2PNetworkingService::update() {
 #ifdef STAR_ENABLE_DISCORD_INTEGRATION
   for (auto& p : m_pendingDiscordJoinRequests) {
     if (auto res = p.second.result()) {
-      discord::ActivityJoinRequestReply reply;
+      discord::ActivityJoinRequestReply reply{discord::ActivityJoinRequestReply::Ignore};
       switch (*res) {
         case P2PJoinRequestReply::Yes:
           reply = discord::ActivityJoinRequestReply::Yes;

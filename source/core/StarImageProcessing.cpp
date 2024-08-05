@@ -276,20 +276,20 @@ ImageOperation imageOperationFromString(StringView string) {
               #define COLOUR_NEEDS_SUB(bytes, castType) (bytes[0] == (castType)0xbc && bytes[1] == (castType)0xbc && bytes[2] == (castType)0x5d) // Check if this colour is the one needing substitution.
               #define COLOUR_NEEDS_SUB_RGBA(bytes, castType) (bytes[0] == (castType)0xbc && bytes[1] == (castType)0xbc && bytes[2] == (castType)0x5d && bytes[3] == (castType)0xff) // Same, but for RGBA.
               #define SUBBED_COLOUR Vec5B(0xbc, 0xbc, 0x5e, 0xff, 0xff) // The substituted colour, for lookups.
-              #define OLD_COLOUR_BYTE_B (char)0x5d // The byte to replace with...
-              #define NEW_COLOUR_BYTE_B (char)0x5e // this byte.
+              #define OLD_COLOUR_BYTE_B (uint8_t)0x5d // The byte to replace with...
+              #define NEW_COLOUR_BYTE_B (uint8_t)0x5e // this byte.
 
               #define COLOUR_2_NEEDS_SUB(bytes, castType) (bytes[0] == (castType)0xad && bytes[1] == (castType)0x9b && bytes[2] == (castType)0x5a) // Check if this colour is the one needing substitution.
               #define COLOUR_2_NEEDS_SUB_RGBA(bytes, castType) (bytes[0] == (castType)0xad && bytes[1] == (castType)0x9b && bytes[2] == (castType)0x5a && bytes[3] == (castType)0xff) // Same, but for RGBA.
               #define SUBBED_COLOUR_2 Vec5B(0xae, 0x9c, 0x5a, 0xff, 0xff) // The substituted colour, for lookups.
-              #define OLD_COLOUR_BYTE_R (char)0xad // The first byte to replace with...
-              #define NEW_COLOUR_BYTE_R (char)0xae // this byte.
-              #define OLD_COLOUR_BYTE_G (char)0x9b // The second byte to replace with...
-              #define NEW_COLOUR_BYTE_G (char)0x9c // this byte.
+              #define OLD_COLOUR_BYTE_R (uint8_t)0xad // The first byte to replace with...
+              #define NEW_COLOUR_BYTE_R (uint8_t)0xae // this byte.
+              #define OLD_COLOUR_BYTE_G (uint8_t)0x9b // The second byte to replace with...
+              #define NEW_COLOUR_BYTE_G (uint8_t)0x9c // this byte.
 
-              bool colourNeedsSub = COLOUR_NEEDS_SUB(c, char); // Micro-optimisation.
-              bool colour2NeedsSub = COLOUR_2_NEEDS_SUB(c, char); // Micro-optimisation.
-              if (which) c[4] = (colourNeedsSub || colour2NeedsSub) ? (char)255 : 0; // Mark the presence of the following hack for later.
+              bool colourNeedsSub = COLOUR_NEEDS_SUB(c, uint8_t); // Micro-optimisation.
+              bool colour2NeedsSub = COLOUR_2_NEEDS_SUB(c, uint8_t); // Micro-optimisation.
+              if (which) c[4] = (colourNeedsSub || colour2NeedsSub) ? (uint8_t)255 : 0; // Mark the presence of the following hack for later.
 
               c[0] = (which && colour2NeedsSub) ? NEW_COLOUR_BYTE_R : c[0]; // Substitute `ad` with `ae` if we're in an `a` of `ad9b5a`.
               c[1] = (which && colour2NeedsSub) ? NEW_COLOUR_BYTE_G : c[1]; // Substitute `9b` with `9c` if we're in an `a` of `ad9b5a`.
@@ -305,7 +305,7 @@ ImageOperation imageOperationFromString(StringView string) {
             else if (!which || (ptr != end && ++ptr != end)) // If we're in `b` of `a=b` and the hex string is of the wrong length, throw an exception.
               throw ImageOperationException(strf("Improper size for hex string '{}' in imageOperationFromString", StringView(hexPtr, hexLen)), false);
             else // We're in `a` of `a=b`. In vanilla, only `a=b` pairs are evaluated, so only throw an exception if `b` is also there.
-              return move(operation); // Return the incomplete operation, whose parsing stopped just before the invalid `a`, so no valid replacements after that part will be executed.
+              return operation; // Return the incomplete operation, whose parsing stopped just before the invalid `a`, so no valid replacements after that part will be executed.
 
             which = !which; // If we parsed a hex colour code, switch `which` to the other colour. I.e., from `a` to `b` and vice versa.
             if (which)
@@ -781,8 +781,9 @@ void processImageOperation(ImageOperation const& operation, Image& image, ImageR
     borderImage.forEachPixel([&op, &image, &borderImageSize](int x, int y, Vec4B& pixel) {
       // FezzedOne: Fixed potential CPU pegging exploit.
       int pixels = std::clamp(op->pixels, 0u, 128u);
-      if (op->pixels != pixels)
+      if (pixels != static_cast<int>(op->pixels)) {
         Logger::warn("{}: {} width must be between 0 and 128 inclusive!", op->outlineOnly ? "outline" : "border", op->outlineOnly ? "Outline" : "Border");
+      }
       bool includeTransparent = op->includeTransparent;
       if (pixel[3] == 0 || (includeTransparent && pixel[3] != 255)) {
         int dist = std::numeric_limits<int>::max();

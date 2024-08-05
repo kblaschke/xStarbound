@@ -194,7 +194,7 @@ void MaterialItem::fire(FireMode mode, bool shifting, bool edgeTriggered) {
     : Root::singleton().materialDatabase()->materialCollisionKind(m_material);
 
   size_t total = 0;
-  for (int i = 0; i != steps; ++i) {
+  for (int i = 0; i != static_cast<int>(steps); ++i) {
     auto placementOrigin = aimPosition + diff * (1.0f - ((float)i / steps));
     if (!owner()->inToolRange(placementOrigin))
       continue;

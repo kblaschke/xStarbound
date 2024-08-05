@@ -2593,10 +2593,10 @@ void Player::addChatMessage(String const &message, Maybe<String> const &portrait
     if (bubbleConfig) {
       String chatPrefix = "";
       try { chatPrefix = bubbleConfig.get().getString("chatPrefix", ""); }
-      catch (JsonException) { chatPrefix = ""; }
+      catch (JsonException&) { chatPrefix = ""; }
       String chatSuffix = "";
       try { chatSuffix = bubbleConfig.get().getString("chatSuffix", ""); }
-      catch (JsonException) { chatSuffix = ""; }
+      catch (JsonException&) { chatSuffix = ""; }
       String modifiedMessage = chatPrefix + message + chatSuffix;
       m_pendingChatActions.append(PortraitChatAction{sourceEntityId.value(entityId()), portrait.get(), modifiedMessage, mouthPosition(), *bubbleConfig});
     } else {
@@ -2606,10 +2606,10 @@ void Player::addChatMessage(String const &message, Maybe<String> const &portrait
     if (bubbleConfig) {
       String chatPrefix = "";
       try { chatPrefix = bubbleConfig.get().getString("chatPrefix", ""); }
-      catch (JsonException) { chatPrefix = ""; }
+      catch (JsonException&) { chatPrefix = ""; }
       String chatSuffix = "";
       try { chatSuffix = bubbleConfig.get().getString("chatSuffix", ""); }
-      catch (JsonException) { chatSuffix = ""; }
+      catch (JsonException&) { chatSuffix = ""; }
       String modifiedMessage = chatPrefix + message + chatSuffix;
       m_pendingChatActions.append(SayChatAction{sourceEntityId.value(entityId()), modifiedMessage, mouthPosition(), *bubbleConfig});
     } else {
@@ -2627,22 +2627,22 @@ void Player::addChatMessageCallback(String const &message) {
   Maybe<String> chatPortrait;
   try {
     chatPortrait = m_chatBubbleConfig.getString("chatPortrait");
-  } catch (JsonException) {
+  } catch (JsonException&) {
     chatPortrait = {};
   }
   bool skipChatBubble = false;
   try {
     skipChatBubble = m_chatBubbleConfig.getBool("skipChatBubble");
-  } catch (JsonException) {
+  } catch (JsonException&) {
     skipChatBubble = false;
   }
 
   String chatPrefix = "";
   try { chatPrefix = m_chatBubbleConfig.getString("chatPrefix", ""); }
-  catch (JsonException) { chatPrefix = ""; }
+  catch (JsonException&) { chatPrefix = ""; }
   String chatSuffix = "";
   try { chatSuffix = m_chatBubbleConfig.getString("chatSuffix", ""); }
-  catch (JsonException) { chatSuffix = ""; }
+  catch (JsonException&) { chatSuffix = ""; }
   String modifiedMessage = chatPrefix + message + chatSuffix;
 
   if (!skipChatBubble) {
@@ -3290,7 +3290,7 @@ Json Player::getSecretProperty(String const& name, Json defaultValue) const {
       { Logger::error("Exception reading secret player property '{}': {}", name, e.what()); }
   }
 
-  return move(defaultValue);
+  return defaultValue;
 }
 
 void Player::setSecretProperty(String const& name, Json const& value) {

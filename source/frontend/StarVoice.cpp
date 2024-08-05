@@ -474,7 +474,7 @@ StringList Voice::availableDevices() {
 	StringList deviceList;
 	if (devices > 0) {
 		deviceList.reserve(devices);
-		for (size_t i = 0; i != devices; ++i)
+		for (int i = 0; i != devices; ++i)
 			deviceList.emplace_back(SDL_GetAudioDeviceName(i, 1));
 	}
 	deviceList.sort();

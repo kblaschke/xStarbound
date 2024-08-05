@@ -46,7 +46,7 @@ LuaCallbacks LuaBindings::makeInputCallbacks() {
         result.emplace_back(jEvent.set("processed", pair.second));
     }
 
-    return move(result);
+    return result;
   });
 
   return callbacks;

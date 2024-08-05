@@ -229,17 +229,17 @@ namespace WorldImpl {
       return false;
 
     auto isAdjacentToConnectable = [&](Vec2I const& pos, unsigned distance, bool foreground) {
-      if (pos.y() - distance < 0)
+      if ((pos.y() - static_cast<int>(distance)) < 0)
         return true;
 
-      int maxY = pos.y() + distance + 1;
-      int maxX = pos.x() + distance + 1;
-      for (int y = pos.y() - distance; y != maxY; ++y) {
+      int maxY = static_cast<int>(pos.y() + distance + 1);
+      int maxX = static_cast<int>(pos.x() + distance + 1);
+      for (int y = static_cast<int>(pos.y() - distance); y != maxY; ++y) {
         Vec2I tPos = { 0, y };
-        for (int x = pos.x() - distance; x != maxX; ++x) {
+        for (int x = static_cast<int>(pos.x() - distance); x != maxX; ++x) {
           tPos[0] = x;
           if (tPos != pos) {
-            auto& tile = getTile(tPos);
+            const auto& tile = getTile(tPos);
             if (isConnectableMaterial(foreground ? tile.foreground : tile.background))
               return true;
           }
