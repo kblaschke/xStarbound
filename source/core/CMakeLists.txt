@@ -209,6 +209,21 @@ elseif(STAR_SYSTEM_FAMILY_WINDOWS)
     )
 endif()
 
+# Image processing requires strict math, otherwise produces visual artifacts due to unsafe optimizations
+if(STAR_COMPILER_MSVC)
+    set_source_files_properties(StarImageProcessing.cpp PROPERTIES
+            COMPILE_OPTIONS "/fp:strict"
+    )
+elseif (STAR_COMPILER_CLANG)
+    set_source_files_properties(StarImageProcessing.cpp PROPERTIES
+            COMPILE_OPTIONS "-fno-fast-math"
+    )
+else()
+    set_source_files_properties(StarImageProcessing.cpp PROPERTIES
+            COMPILE_OPTIONS "-fno-unsafe-math-optimizations"
+    )
+endif ()
+
 target_include_directories(star_core
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}

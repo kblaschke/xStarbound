@@ -40,21 +40,7 @@ Image scaleNearest(Image const& srcImage, Vec2F scale) {
   }
 }
 
-#if defined STAR_COMPILER_MSVC
-  // FezzedOne: Needed to use `/fp:strict` for this function on MSVC and disable `-ffast-math` on recent versions of Clang.
-  #pragma float_control(precise, on)  // enable precise semantics
-  #pragma fenv_access(on)             // enable environment sensitivity
-  #pragma float_control(except, on)   // enable exception semantics
-#elif defined STAR_COMPILER_CLANG
-  // #pragma clang optimize off
-#elif defined STAR_COMPILER_GNU
-  // FezzedOne: Disable floating-point optimisations on GCC.
-  #pragma GCC optimize("no-unsafe-math-optimizations")
-#endif
 Image scaleBilinear(Image const& srcImage, Vec2F scale) {
-  #if defined STAR_COMPILER_CLANG
-    #pragma clang fp reciprocal(off) reassociate(off) contract(on) exceptions(strict)
-  #endif
   if (!(scale[0] == 1.0f && scale[1] == 1.0f)) {
     // «Downstreamed» from Kae. Fixes a segfault.
     if ((scale[0] < 0.0f || scale[1] < 0.0f)) {
@@ -73,10 +59,6 @@ Image scaleBilinear(Image const& srcImage, Vec2F scale) {
     Vec2U srcSize = srcImage.size();
     Vec2U destSize;
     {
-      // #if defined STAR_COMPILER_CLANG
-      //   // FezzedOne: Needed to disable `-ffast-math` on Clang.
-      //   #pragma clang fp reciprocal(off) reassociate(off) contract(on) exceptions(strict)
-      // #endif
       destSize = Vec2U::round(vmult(Vec2F(srcSize), scale));
     }
     destSize[0] = max(destSize[0], 1u);
@@ -89,10 +71,6 @@ Image scaleBilinear(Image const& srcImage, Vec2F scale) {
         Vec4B processedResult;
 
         {
-          // #if defined STAR_COMPILER_CLANG
-          //   // FezzedOne: Needed to disable `-ffast-math` on Clang.
-          //   #pragma clang fp reciprocal(off) reassociate(off) contract(on) exceptions(strict)
-          // #endif
           auto pos = vdiv(Vec2F(x, y), scale);
           auto ipart = Vec2I::floor(pos);
           auto fpart = pos - Vec2F(ipart);
@@ -127,17 +105,6 @@ Image scaleBilinear(Image const& srcImage, Vec2F scale) {
     return srcImage;
   }
 }
-#if defined STAR_COMPILER_MSVC
-  // FezzedOne: Reset everything back to the default MSVC options for the build.
-  #pragma float_control(except, off)  // disable exception semantics
-  #pragma fenv_access(off)            // disable environment sensitivity
-  #pragma float_control(precise, off) // disable precise semantics
-#elif defined STAR_COMPILER_CLANG
-  // #pragma clang optimize on
-#elif defined STAR_COMPILER_GNU
-  // FezzedOne: Reset to whatever MinGW GCC options were specified in CMakeLists.txt.
-  #pragma GCC reset_options
-#endif
 
 Image scaleBicubic(Image const& srcImage, Vec2F scale) {
   if (!(scale[0] == 1.0f && scale[1] == 1.0f)) {
